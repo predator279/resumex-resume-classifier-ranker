@@ -1,0 +1,15 @@
+# backend/requirements.txt
+# CPU-only PyTorch is installed SEPARATELY in the Dockerfile via:
+#   RUN pip install torch --index-url https://download.pytorch.org/whl/cpu
+# Do NOT add torch here to avoid pulling the GPU wheel.
+
+fastapi
+uvicorn[standard]
+transformers
+sentence-transformers
+numpy
+PyPDF2
+python-docx
+huggingface_hub
+scikit-learn
+python-multipart

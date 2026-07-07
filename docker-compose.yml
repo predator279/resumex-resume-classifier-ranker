@@ -1,0 +1,48 @@
+# docker-compose.yml — ResumeX local development
+#
+# Usage:
+#   docker-compose up --build       (first time or after code changes)
+#   docker-compose up               (subsequent runs — uses cached image)
+#   docker-compose down             (stop and remove containers)
+#
+# App will be available at: http://localhost:8000
+# Health check:             http://localhost:8000/health
+
+version: '3.9'
+
+services:
+  resumex:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: resumex:latest
+    container_name: resumex
+
+    ports:
+      - "8000:8000"
+
+    volumes:
+      # Persist downloaded HuggingFace models across container restarts.
+      # First run: models download (~530 MB, ~60-90 seconds).
+      # Subsequent runs: load from this volume — fast startup.
+      - resumex-models:/root/.cache/huggingface
+
+    environment:
+      - TRANSFORMERS_CACHE=/root/.cache/huggingface
+      - HF_HOME=/root/.cache/huggingface
+      # Set to WARNING in production to reduce log noise
+      - LOG_LEVEL=INFO
+
+    restart: unless-stopped
+
+    # Basic health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s   # Allow time for model download on first run
+
+volumes:
+  resumex-models:
+    driver: local

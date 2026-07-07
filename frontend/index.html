@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ResumeX — AI Resume Classifier & Ranker</title>
+  <meta name="description" content="ResumeX uses fine-tuned BERT to classify resumes and ranks candidates against a job description using ATS-grade 5-dimension scoring." />
+  <!-- Anti-flash: apply saved theme before stylesheet renders -->
+  <script>try{var t=localStorage.getItem('resumex-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230D0D0D'/><text y='.9em' font-size='70' x='15'>R</text></svg>" />
+</head>
+<body>
+
+  <!-- Dark mode toggle -->
+  <button id="theme-toggle" class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle dark mode">
+    <!-- Moon: shown in light mode -->
+    <svg id="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    </svg>
+    <!-- Sun: shown in dark mode -->
+    <svg id="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      style="display:none" aria-hidden="true">
+      <circle cx="12" cy="12" r="4"/>
+      <line x1="12" y1="2" x2="12" y2="6"/>
+      <line x1="12" y1="18" x2="12" y2="22"/>
+      <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/>
+      <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
+      <line x1="2" y1="12" x2="6" y2="12"/>
+      <line x1="18" y1="12" x2="22" y2="12"/>
+      <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/>
+      <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>
+    </svg>
+  </button>
+
+  <!-- ═══════════════════════════════════════════════
+       HERO
+  ════════════════════════════════════════════════════ -->
+  <div class="hero-section">
+    <div class="hero-inner">
+      <div class="hero-eyebrow">Resume Classification &amp; ATS Ranking</div>
+      <h1 class="hero-title">Rank resumes with<br>AI precision.</h1>
+      <p class="hero-subtitle">
+        Upload a job description. Auto-extract requirements.<br>
+        Score every candidate across 5 dimensions in seconds.
+      </p>
+      <div id="status-badge" class="status-badge loading" role="status" aria-live="polite">
+        <span class="status-dot"></span>
+        <span id="status-text">Connecting…</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       CONTENT
+  ════════════════════════════════════════════════════ -->
+  <div class="content-section">
+
+    <!-- Tabs -->
+    <nav class="tabs" role="tablist" aria-label="Application tabs">
+      <button id="tab-classify-btn" class="tab-btn active" role="tab"
+        aria-selected="true" aria-controls="panel-classify" onclick="switchTab('classify')">
+        <!-- file-search icon -->
+        <svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v3"/>
+          <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+          <circle cx="8" cy="16" r="3"/>
+          <path d="m11.5 19.5 1.5 1.5"/>
+        </svg>
+        Classify Resume
+      </button>
+      <button id="tab-rank-btn" class="tab-btn" role="tab"
+        aria-selected="false" aria-controls="panel-rank" onclick="switchTab('rank')">
+        <!-- file-chart-column icon -->
+        <svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <path d="M14 2v6h6"/>
+          <path d="M8 18v-2"/><path d="M12 18v-5"/><path d="M16 18v-8"/>
+        </svg>
+        Rank Candidates
+      </button>
+    </nav>
+
+    <!-- ═════════════════════════════════════════════
+         CLASSIFY TAB
+    ══════════════════════════════════════════════════ -->
+    <section id="panel-classify" class="tab-panel active" role="tabpanel" aria-labelledby="tab-classify-btn">
+      <div class="card">
+        <h2 class="card-title">
+          <span class="card-title-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v3"/>
+              <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+              <circle cx="8" cy="16" r="3"/>
+              <path d="m11.5 19.5 1.5 1.5"/>
+            </svg>
+          </span>
+          Resume Category Predictor
+        </h2>
+
+        <div id="classify-drop-zone" class="drop-zone"
+          ondragover="handleDragOver(event, this)" ondragleave="handleDragLeave(this)"
+          ondrop="handleDrop(event, 'classify')" aria-label="File upload drop zone">
+          <input type="file" id="classify-file-input" accept=".pdf,.docx,.doc,.txt"
+            onchange="handleFileSelect(event, 'classify')" aria-label="Select resume file" />
+          <!-- file-up icon -->
+          <div class="drop-zone-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="12" y1="18" x2="12" y2="12"/>
+              <polyline points="9 15 12 12 15 15"/>
+            </svg>
+          </div>
+          <p class="drop-zone-title">Drop your resume here, or <span class="drop-zone-accent">browse</span></p>
+          <p class="drop-zone-sub">PDF, DOCX, TXT — max 10 MB</p>
+        </div>
+
+        <div id="classify-pills" class="file-pills" aria-live="polite"></div>
+
+        <button id="classify-btn" class="btn btn-primary" onclick="submitClassify()"
+          disabled aria-label="Analyze resume and predict categories">
+          <div class="btn-spinner" aria-hidden="true"></div>
+          <span class="btn-text" style="display:flex;align-items:center;gap:7px">
+            <!-- sparkles icon -->
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+              <path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>
+            </svg>
+            Analyze Resume
+          </span>
+        </button>
+
+        <div id="classify-error" role="alert" aria-live="assertive" style="display:none"></div>
+        <div id="classify-results" style="display:none" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- ═════════════════════════════════════════════
+         RANK TAB
+    ══════════════════════════════════════════════════ -->
+    <section id="panel-rank" class="tab-panel" role="tabpanel" aria-labelledby="tab-rank-btn">
+      <div class="card">
+        <h2 class="card-title">
+          <span class="card-title-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <path d="M14 2v6h6"/>
+              <path d="M8 18v-2"/><path d="M12 18v-5"/><path d="M16 18v-8"/>
+            </svg>
+          </span>
+          ATS Resume Ranker
+        </h2>
+
+        <!-- JD Textarea -->
+        <div class="form-group jd-input-area">
+          <label class="form-label" for="rank-jd-text">
+            Job Description
+            <small style="text-transform:none;letter-spacing:0;font-weight:400;color:var(--text-muted)">
+              — paste the full JD and we'll auto-extract requirements
+            </small>
+          </label>
+          <textarea id="rank-jd-text" class="jd-textarea"
+            placeholder="Paste the full job description here…&#10;&#10;e.g. We are looking for a Senior Data Scientist with 5+ years of experience in Python, SQL, and cloud platforms…"
+            oninput="onJdInput()" aria-label="Job description text"></textarea>
+
+          <button id="parse-jd-btn" class="btn-parse-jd" onclick="parseJd()" disabled
+            aria-label="Auto-extract requirements from job description">
+            <!-- loader icon (hidden, shown during load) -->
+            <span id="parse-jd-spinner" style="display:none">
+              <svg class="icon-spin" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+              </svg>
+            </span>
+            <!-- zap icon -->
+            <span id="parse-jd-icon" class="icon">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+            </span>
+            <span id="parse-jd-label">Auto-Extract Requirements</span>
+          </button>
+        </div>
+
+        <!-- Extracted Panel -->
+        <div id="extracted-panel" class="extracted-panel" style="display:none" aria-live="polite">
+          <div class="extracted-panel-header">
+            <div class="extracted-panel-title">
+              <!-- circle-check icon -->
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              Extracted Requirements
+              <span style="font-size:0.7rem;color:var(--text-muted);font-weight:400;text-transform:none;letter-spacing:0">
+                — edit or add/remove
+              </span>
+            </div>
+            <button class="extracted-clear-btn" onclick="clearExtracted()" aria-label="Clear extracted requirements">
+              Clear
+            </button>
+          </div>
+
+          <!-- Skills -->
+          <div style="margin-bottom:var(--space-sm)">
+            <div style="display:flex;align-items:center;gap:5px;font-size:0.68rem;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:0.09em;margin-bottom:6px">
+              <!-- tag icon -->
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/>
+                <path d="M7 7h.01"/>
+              </svg>
+              Required Skills
+            </div>
+            <div id="skill-chips-container" class="skill-chips-row">
+              <input type="text" id="add-skill-input" class="add-skill-input"
+                placeholder="+ add skill" onkeydown="onAddSkillKey(event)" aria-label="Add a required skill" />
+            </div>
+          </div>
+
+          <!-- Meta chips -->
+          <div class="meta-chips-row">
+            <div class="meta-chip">
+              <!-- briefcase icon -->
+              <span class="meta-chip-label" style="display:flex;align-items:center;gap:3px">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                </svg>
+                Exp.
+              </span>
+              <input type="number" id="meta-exp" class="meta-chip-input" min="0" max="40" step="1"
+                placeholder="—" style="width:50px" aria-label="Required years of experience" />
+              <span style="color:var(--text-muted);font-size:0.75rem">yrs</span>
+            </div>
+
+            <div class="meta-chip">
+              <!-- graduation-cap icon -->
+              <span class="meta-chip-label" style="display:flex;align-items:center;gap:3px">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M22 10v6"/>
+                  <path d="M2 10l10-5 10 5-10 5z"/>
+                  <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                </svg>
+                Edu.
+              </span>
+              <input type="text" id="meta-edu" class="meta-chip-input"
+                placeholder="—" style="width:100px" aria-label="Required education level" />
+            </div>
+
+            <div id="meta-seniority-chip" class="meta-chip" style="display:none">
+              <!-- user icon -->
+              <span class="meta-chip-label" style="display:flex;align-items:center;gap:3px">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                Level
+              </span>
+              <span id="meta-seniority-badge"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider" style="margin-top:var(--space-lg)"></div>
+
+        <!-- Resume Upload -->
+        <div class="form-group">
+          <label class="form-label">Upload Candidate Resumes</label>
+          <div id="rank-drop-zone" class="drop-zone"
+            ondragover="handleDragOver(event, this)" ondragleave="handleDragLeave(this)"
+            ondrop="handleDrop(event, 'rank')" aria-label="Multiple resume upload drop zone">
+            <input type="file" id="rank-file-input" accept=".pdf,.docx,.doc,.txt"
+              multiple onchange="handleFileSelect(event, 'rank')" aria-label="Select multiple resume files" />
+            <!-- cloud-upload icon -->
+            <div class="drop-zone-icon">
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="16 16 12 12 8 16"/>
+                <line x1="12" y1="12" x2="12" y2="21"/>
+                <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+              </svg>
+            </div>
+            <p class="drop-zone-title">Drop resumes here, or <span class="drop-zone-accent">browse</span></p>
+            <p class="drop-zone-sub">Upload multiple PDF / DOCX / TXT files</p>
+          </div>
+          <div id="rank-pills" class="file-pills" aria-live="polite"></div>
+        </div>
+
+        <button id="rank-btn" class="btn btn-primary" onclick="submitRank()"
+          disabled aria-label="Rank all uploaded candidates against the job description">
+          <div class="btn-spinner" aria-hidden="true"></div>
+          <span class="btn-text" style="display:flex;align-items:center;gap:7px">
+            <!-- trending-up icon -->
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+              <polyline points="16 7 22 7 22 13"/>
+            </svg>
+            Rank Candidates
+          </span>
+        </button>
+
+        <div id="rank-error" role="alert" aria-live="assertive" style="display:none"></div>
+        <div id="rank-results" style="display:none" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>
+        ResumeX &mdash; Powered by
+        <a href="https://huggingface.co/predator279/resume-classifier-model" target="_blank" rel="noopener noreferrer">BERT fine-tuned classifier</a>
+        &amp;
+        <a href="https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2" target="_blank" rel="noopener noreferrer">MiniLM-L6-v2</a>
+      </p>
+    </footer>
+
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
