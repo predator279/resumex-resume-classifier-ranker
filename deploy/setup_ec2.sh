@@ -48,7 +48,7 @@ free -h
 echo ""
 echo ">>> Installing Docker and Git …"
 sudo yum update -y
-sudo yum install -y docker git curl
+sudo yum install -y docker git
 
 echo ">>> Starting Docker service …"
 sudo systemctl start docker
