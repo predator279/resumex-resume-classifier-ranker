@@ -37,3 +37,7 @@ env/
 
 # OS
 Thumbs.db
+
+# AWS Private Keys — NEVER commit these
+*.pem
+*.ppk

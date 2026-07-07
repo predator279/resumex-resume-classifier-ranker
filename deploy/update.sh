@@ -29,23 +29,10 @@ echo ""
 echo ">>> Pulling latest code from GitHub …"
 git pull origin main
 
-# ── 2. Rebuild Docker image ───────────────────────────────────────────────────
+# ── 2. Run with Docker Compose ───────────────────────────────────────────────
 echo ""
-echo ">>> Rebuilding Docker image …"
-sudo docker build -t "$IMAGE_NAME" .
-
-# ── 3. Replace running container ─────────────────────────────────────────────
-echo ""
-echo ">>> Replacing container …"
-sudo docker stop "$CONTAINER_NAME" 2>/dev/null || true
-sudo docker rm   "$CONTAINER_NAME" 2>/dev/null || true
-
-sudo docker run -d \
-  --name "$CONTAINER_NAME" \
-  -p 80:8000 \
-  -v resumex-models:/root/.cache/huggingface \
-  --restart unless-stopped \
-  "$IMAGE_NAME"
+echo ">>> Replacing containers (Zero-downtime recreation if needed) …"
+sudo docker compose up -d --build
 
 # ── 4. Verify ─────────────────────────────────────────────────────────────────
 echo ""

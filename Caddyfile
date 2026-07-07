@@ -1,0 +1,3 @@
+supreme.codes, www.supreme.codes {
+    reverse_proxy resumex:8000
+}

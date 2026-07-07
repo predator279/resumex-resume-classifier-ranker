@@ -78,21 +78,10 @@ echo ""
 echo ">>> Building Docker image (this may take 5-10 minutes on first run) …"
 sudo docker build -t "$IMAGE_NAME" .
 
-# ── 5. Stop any existing container ───────────────────────────────────────────
+# ── 5. Run the containers with Docker Compose ──────────────────────────────────
 echo ""
-echo ">>> Stopping existing container (if any) …"
-sudo docker stop "$CONTAINER_NAME" 2>/dev/null || true
-sudo docker rm   "$CONTAINER_NAME" 2>/dev/null || true
-
-# ── 6. Run the container ─────────────────────────────────────────────────────
-echo ""
-echo ">>> Starting ResumeX container …"
-sudo docker run -d \
-  --name "$CONTAINER_NAME" \
-  -p 80:8000 \
-  -v resumex-models:/root/.cache/huggingface \
-  --restart unless-stopped \
-  "$IMAGE_NAME"
+echo ">>> Starting containers (ResumeX + Caddy) …"
+sudo docker compose up -d --build
 
 # ── 7. Wait and verify ───────────────────────────────────────────────────────
 echo ""

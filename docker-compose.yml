@@ -11,6 +11,21 @@
 version: '3.9'
 
 services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - resumex
+
   resumex:
     build:
       context: .
@@ -18,8 +33,9 @@ services:
     image: resumex:latest
     container_name: resumex
 
-    ports:
-      - "8000:8000"
+    # Remove port mapping as Caddy will handle it
+    # ports:
+    #   - "8000:8000"
 
     volumes:
       # Persist downloaded HuggingFace models across container restarts.
@@ -45,4 +61,8 @@ services:
 
 volumes:
   resumex-models:
+    driver: local
+  caddy_data:
+    driver: local
+  caddy_config:
     driver: local
