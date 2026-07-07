@@ -1,0 +1,19 @@
+# .gitattributes — enforce consistent line endings across OS
+#
+# Shell scripts MUST use LF (Unix) line endings.
+# Windows CRLF line endings will break bash on Linux EC2.
+
+# Default: let Git handle text files normally
+* text=auto
+
+# Force LF for shell scripts (critical for Linux/EC2 compatibility)
+*.sh text eol=lf
+
+# Force LF for Dockerfile and config files
+Dockerfile text eol=lf
+docker-compose.yml text eol=lf
+*.py text eol=lf
+
+# Force CRLF for Windows batch files (if any)
+*.bat text eol=crlf
+*.cmd text eol=crlf
