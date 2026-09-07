@@ -29,7 +29,13 @@ echo ""
 echo ">>> Pulling latest code from GitHub …"
 git pull origin main
 
-# ── 2. Run with Docker Compose ───────────────────────────────────────────────
+# ── 2. Clean unused build cache & dangling images to free disk space ─────────
+echo ""
+echo ">>> Cleaning up old Docker build cache and dangling layers …"
+sudo docker builder prune -f
+sudo docker image prune -f
+
+# ── 3. Run with Docker Compose ───────────────────────────────────────────────
 echo ""
 echo ">>> Replacing containers (Zero-downtime recreation if needed) …"
 sudo docker compose up -d --build
