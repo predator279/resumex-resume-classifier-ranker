@@ -17,11 +17,20 @@ from fastapi import FastAPI, File, Form, UploadFile, HTTPException, Body
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from .models_loader import load_all_models, models_are_loaded
 from .classifier import classify_resume
 from .jd_parser import parse_jd
 from .ranker import rank_resumes
+from .metrics import (
+    BERT_INFERENCE_DURATION,
+    ATS_RANKING_DURATION,
+    JD_PARSER_DURATION,
+    CLASSIFIER_CONFIDENCE,
+    RESUMES_PROCESSED_TOTAL,
+    RESUME_FILE_SIZE_BYTES,
+)
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -46,7 +55,7 @@ async def lifespan(app: FastAPI):
 
 
 # ---------------------------------------------------------------------------
-# App
+# App & Metrics Instrumentation
 # ---------------------------------------------------------------------------
 app = FastAPI(
     title="ResumeX API",
@@ -54,6 +63,9 @@ app = FastAPI(
     version="2.0.0",
     lifespan=lifespan,
 )
+
+# Instrument FastAPI with Prometheus (exposes /metrics)
+Instrumentator().instrument(app).expose(app, endpoint="/metrics")
 
 # ---------------------------------------------------------------------------
 # Static files (frontend SPA)
@@ -95,9 +107,21 @@ async def classify(file: UploadFile = File(...)):
     if not data:
         raise HTTPException(400, "Uploaded file is empty.")
 
+    RESUME_FILE_SIZE_BYTES.observe(len(data))
+
     try:
-        return classify_resume(file.filename, data)
+        with BERT_INFERENCE_DURATION.time():
+            result = classify_resume(file.filename, data)
+
+        # Track top prediction confidence for drift detection
+        if result and result.get("top_predictions"):
+            top_prob = result["top_predictions"][0].get("probability", 0.0)
+            CLASSIFIER_CONFIDENCE.observe(top_prob)
+
+        RESUMES_PROCESSED_TOTAL.labels(endpoint="classify", status="success").inc()
+        return result
     except Exception as e:
+        RESUMES_PROCESSED_TOTAL.labels(endpoint="classify", status="error").inc()
         logger.exception("Classify error for '%s'", file.filename)
         raise HTTPException(500, str(e))
 
@@ -124,7 +148,8 @@ async def parse_jd_endpoint(req: ParseJDRequest):
         raise HTTPException(400, "jd_text cannot be empty.")
 
     try:
-        result = parse_jd(req.jd_text)
+        with JD_PARSER_DURATION.time():
+            result = parse_jd(req.jd_text)
         return result
     except Exception as e:
         logger.exception("JD parse error")
@@ -195,20 +220,22 @@ async def rank(
             raise HTTPException(400, f"Unsupported type '{ext}' for '{upload.filename}'.")
         raw = await upload.read()
         if raw:
+            RESUME_FILE_SIZE_BYTES.observe(len(raw))
             files.append((upload.filename, raw))
 
     if not files:
         raise HTTPException(400, "All uploaded files are empty.")
 
     try:
-        result = rank_resumes(
-            files=files,
-            jd_text=jd_text,
-            required_skills=required_skills,
-            required_years=required_years,
-            required_education=required_education,
-            required_seniority=required_seniority,
-        )
+        with ATS_RANKING_DURATION.time():
+            result = rank_resumes(
+                files=files,
+                jd_text=jd_text,
+                required_skills=required_skills,
+                required_years=required_years,
+                required_education=required_education,
+                required_seniority=required_seniority,
+            )
         # Surface the effective requirements back to the client
         result["effective_requirements"] = {
             "skills":      required_skills,
@@ -216,7 +243,9 @@ async def rank(
             "education":   required_education,
             "seniority":   required_seniority,
         }
+        RESUMES_PROCESSED_TOTAL.labels(endpoint="rank", status="success").inc(len(files))
         return result
     except Exception as e:
+        RESUMES_PROCESSED_TOTAL.labels(endpoint="rank", status="error").inc(len(files))
         logger.exception("Rank error")
         raise HTTPException(500, str(e))

@@ -25,6 +25,7 @@ services:
       - caddy_config:/config
     depends_on:
       - resumex
+      - grafana
 
   resumex:
     build:
@@ -33,9 +34,9 @@ services:
     image: resumex:latest
     container_name: resumex
 
-    # Remove port mapping as Caddy will handle it
-    # ports:
-    #   - "8000:8000"
+    # Port mapping for direct access / local dev & debugging
+    ports:
+      - "8000:8000"
 
     volumes:
       # Persist downloaded HuggingFace models across container restarts.
@@ -59,10 +60,58 @@ services:
       retries: 5
       start_period: 120s   # Allow time for model download on first run
 
+  # ── Prometheus (Time-Series Metrics Collection) ───────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.49.1
+    container_name: prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=2d'
+      - '--web.enable-lifecycle'
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./deploy/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    deploy:
+      resources:
+        limits:
+          memory: 150M
+    depends_on:
+      - resumex
+
+  # ── Grafana (Real-Time Visual Dashboards) ──────────────────────────────────
+  grafana:
+    image: grafana/grafana:10.3.1
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./deploy/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./deploy/grafana/dashboards:/etc/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    deploy:
+      resources:
+        limits:
+          memory: 150M
+    depends_on:
+      - prometheus
+
 volumes:
   resumex-models:
     driver: local
   caddy_data:
     driver: local
   caddy_config:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
     driver: local

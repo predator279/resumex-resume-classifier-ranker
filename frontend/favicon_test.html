@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ResumeX – Favicon Preview</title>
+
+  <!-- ✅ THIS is what will show in the browser tab (test it live here) -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f0f13;
+      color: #e2e2ee;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      padding: 40px 20px;
+    }
+    h1 { font-size: 1.4rem; letter-spacing: 0.05em; color: #aaa; text-align: center; }
+    .grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 32px;
+      justify-content: center;
+      align-items: flex-end;
+    }
+    .card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      background: #1a1a24;
+      border: 1px solid #2e2e48;
+      border-radius: 16px;
+      padding: 28px 24px;
+    }
+    .card label {
+      font-size: 0.75rem;
+      color: #777;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .bg-light { background: #f5f5f5; padding: 12px; border-radius: 12px; }
+    .bg-dark  { background: #111;    padding: 12px; border-radius: 12px; }
+
+    .note {
+      font-size: 0.82rem;
+      color: #888;
+      text-align: center;
+      max-width: 520px;
+      line-height: 1.6;
+    }
+    .note code {
+      background: #1e1e30;
+      border: 1px solid #333;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 0.8rem;
+      color: #ff9a6c;
+    }
+    .pass { color: #5de0a0; font-weight: 600; }
+    .fail { color: #ff6060; font-weight: 600; }
+
+    .tab-bar {
+      background: #1a1a24;
+      border: 1px solid #2e2e48;
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-size: 0.85rem;
+      color: #aaa;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎨 ResumeX — Gradient Favicon Verification</h1>
+
+  <!-- Live favicon check hint -->
+  <div class="tab-bar">
+    👀 Check your <strong style="color:#ff9a6c">&nbsp;browser tab icon&nbsp;</strong> above — it should show the orange→blue gradient icon
+  </div>
+
+  <!-- Size preview grid -->
+  <div class="grid">
+
+    <!-- 16×16 (smallest favicon size) -->
+    <div class="card">
+      <label>16 × 16</label>
+      <div class="bg-dark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="url(#g1)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <defs><linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff7038"/><stop offset="100%" stop-color="#5555d5"/></linearGradient></defs>
+        <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+        <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+        <path d="m8 18 2.5-2.5 2.5 2.5 4-4"/>
+      </svg></div>
+      <label>on dark bg</label>
+    </div>
+
+    <!-- 32×32 -->
+    <div class="card">
+      <label>32 × 32</label>
+      <div class="bg-dark"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="url(#g2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <defs><linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff7038"/><stop offset="100%" stop-color="#5555d5"/></linearGradient></defs>
+        <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+        <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+        <path d="m8 18 2.5-2.5 2.5 2.5 4-4"/>
+      </svg></div>
+      <label>on dark bg</label>
+    </div>
+
+    <!-- 48×48 on dark -->
+    <div class="card">
+      <label>48 × 48</label>
+      <div class="bg-dark"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="url(#g3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <defs><linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff7038"/><stop offset="100%" stop-color="#5555d5"/></linearGradient></defs>
+        <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+        <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+        <path d="m8 18 2.5-2.5 2.5 2.5 4-4"/>
+      </svg></div>
+      <label>on dark bg</label>
+    </div>
+
+    <!-- 48×48 on light -->
+    <div class="card">
+      <label>48 × 48</label>
+      <div class="bg-light"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="url(#g4)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <defs><linearGradient id="g4" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff7038"/><stop offset="100%" stop-color="#5555d5"/></linearGradient></defs>
+        <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+        <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+        <path d="m8 18 2.5-2.5 2.5 2.5 4-4"/>
+      </svg></div>
+      <label>on light bg</label>
+    </div>
+
+    <!-- 96×96 showcase -->
+    <div class="card">
+      <label>96 × 96 — showcase</label>
+      <svg width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="url(#g5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <defs><linearGradient id="g5" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff7038"/><stop offset="100%" stop-color="#5555d5"/></linearGradient></defs>
+        <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+        <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+        <path d="m8 18 2.5-2.5 2.5 2.5 4-4"/>
+      </svg>
+    </div>
+
+  </div>
+
+  <!-- Checklist -->
+  <div class="note">
+    <p>✅ <strong>Checklist before pushing:</strong></p>
+    <br/>
+    <p>1. Browser tab icon shows gradient (orange top-left → blue bottom-right)</p>
+    <p>2. All sizes render clearly — gradient is visible even at <code>16×16</code></p>
+    <p>3. Icon looks good on both dark and light backgrounds</p>
+    <p>4. <code>favicon.svg</code> uses correct namespace: <code>http://www.w3.org/2000/svg</code></p>
+  </div>
+
+</body>
+</html>
