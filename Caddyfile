@@ -2,11 +2,6 @@ resumex.supreme.codes {
     reverse_proxy resumex:8000
 }
 
-# Redirect old apex/www URLs to the canonical subdomain
-supreme.codes, www.supreme.codes {
-    redir https://resumex.supreme.codes{uri} 308
-}
-
 grafana.supreme.codes {
     reverse_proxy grafana:3000
 }
