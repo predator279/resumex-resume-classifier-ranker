@@ -1,12 +1,12 @@
-# docker-compose.yml — ResumeX local development
+# docker-compose.yml — ResumeX production
 #
 # Usage:
 #   docker-compose up --build       (first time or after code changes)
 #   docker-compose up               (subsequent runs — uses cached image)
 #   docker-compose down             (stop and remove containers)
 #
-# App will be available at: http://localhost:8000
-# Health check:             http://localhost:8000/health
+# App will be available at: https://resumex.supreme.codes
+# Health check:             https://resumex.supreme.codes/health
 
 version: '3.9'
 
@@ -48,7 +48,9 @@ services:
     restart: unless-stopped
 
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      # python:3.11-slim has no curl/wget — use Python's built-in http.client instead
+      test: ["CMD", "python", "-c",
+             "import http.client,sys; c=http.client.HTTPConnection('localhost',8000,timeout=5); c.request('GET','/health'); r=c.getresponse(); sys.exit(0 if r.status==200 else 1)"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -64,8 +66,8 @@ services:
       - '--storage.tsdb.path=/prometheus'
       - '--storage.tsdb.retention.time=2d'
       - '--web.enable-lifecycle'
-    ports:
-      - "9090:9090"
+    # No public port — Prometheus is only accessible within the Docker network.
+    # Grafana scrapes it internally via http://prometheus:9090
     volumes:
       - ./deploy/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
